@@ -1,6 +1,6 @@
 package com.mercadolibre.desafio.api.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -27,6 +28,18 @@ public class InboundOrder {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime date;
 
+    @OneToMany()
+    @JsonManagedReference
+    private List<BatchStock> batchStocks;
+
     @ManyToOne(fetch = FetchType.EAGER)
     private Section section;
+
+    public Double getVolume() {
+        Double volume = 0.0;
+        for (BatchStock batch : batchStocks) {
+            volume += batch.getVolume();
+        }
+        return volume;
+    }
 }

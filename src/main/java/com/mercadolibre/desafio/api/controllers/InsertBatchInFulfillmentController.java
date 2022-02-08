@@ -1,14 +1,20 @@
 package com.mercadolibre.desafio.api.controllers;
 
+import com.mercadolibre.desafio.api.dtos.BatchStockDTO;
+import com.mercadolibre.desafio.api.dtos.InboundOrderDTO;
 import com.mercadolibre.desafio.api.dtos.InboundOrderRequestDTO;
 import com.mercadolibre.desafio.api.dtos.InsertBatchInFufillment;
 import com.mercadolibre.desafio.api.entities.BatchStock;
+import com.mercadolibre.desafio.api.entities.InboundOrder;
 import com.mercadolibre.desafio.api.services.InsertBatchInFulfillmentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/fresh-products/inboundorder")
@@ -20,22 +26,20 @@ public class InsertBatchInFulfillmentController {
     }
 
     @PostMapping()
-    public ResponseEntity<List<BatchStock>> insertInboundOrder(@Valid @RequestBody InboundOrderRequestDTO inboundOrderRequestDTO) {
-        InsertBatchInFufillment insertBatchInFufillment = InsertBatchInFufillment.fromInboundOrderDTO(inboundOrderRequestDTO.getInboundOrder());
-        List<BatchStock> batchStocks = this.insertBatchInFulfillmentService.create(insertBatchInFufillment);
-        System.out.println(batchStocks);
-        return ResponseEntity.ok(batchStocks);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<BatchStock> findOne(@PathVariable Long id) {
-       return ResponseEntity.ok(this.insertBatchInFulfillmentService.findOne(id));
+    public ResponseEntity<List<BatchStockDTO>>
+    registerInboundOrder(@Valid @RequestBody InboundOrderRequestDTO requestDto) throws URISyntaxException {
+        InsertBatchInFufillment insertBatchInFufillmentData = InsertBatchInFufillment.fromInboundOrderDTO(requestDto.getInboundOrder());
+        List<BatchStock> batchStocks = this.insertBatchInFulfillmentService.create(insertBatchInFufillmentData);
+        List<BatchStockDTO> dtos = batchStocks.stream().map(BatchStockDTO::toBatchStockDTO).collect(Collectors.toList());
+        return ResponseEntity.created(new URI("/fresh-products/inboundorder")).body(dtos);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<List<BatchStock>> updateInboundOrder(@Valid @RequestBody InboundOrderRequestDTO inboundOrderRequestDTO, @PathVariable Long id) {
-        InsertBatchInFufillment insertBatchInFufillment = InsertBatchInFufillment.fromInboundOrderDTO(inboundOrderRequestDTO.getInboundOrder());
-        List<BatchStock> batchStocks = this.insertBatchInFulfillmentService.update(id, insertBatchInFufillment);
-        return ResponseEntity.ok(batchStocks);
+    public ResponseEntity<InboundOrderDTO>
+    updateInboundOrder(@Valid @RequestBody InboundOrderRequestDTO inboundOrderDTO, @PathVariable Long id) {
+        InsertBatchInFufillment insertBatchInFufillmentData = InsertBatchInFufillment.fromInboundOrderDTO(inboundOrderDTO.getInboundOrder());
+        InboundOrder inboundOrderUpdated = this.insertBatchInFulfillmentService.update(id, insertBatchInFufillmentData);
+        InboundOrderDTO dto = InboundOrderDTO.toInboundOrder(inboundOrderUpdated);
+        return ResponseEntity.ok(dto);
     }
 }

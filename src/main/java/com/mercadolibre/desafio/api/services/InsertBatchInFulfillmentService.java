@@ -9,6 +9,8 @@ import com.mercadolibre.desafio.api.exception.ApiException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class InsertBatchInFulfillmentService {
@@ -26,49 +28,89 @@ public class InsertBatchInFulfillmentService {
         this.batchStockService = batchStockService;
     }
 
-    public List<BatchStock> create(InsertBatchInFufillment insertBatchInFufillment) {
-        this.warehouseService.findById(insertBatchInFufillment.getWarehouseId());
-        Section section = this.sectionService.findById(insertBatchInFufillment.getSectionId());
+    public boolean validateWareHouseExist (Long wareHouseId) {
+        boolean validate = this.warehouseService.existsByCode(wareHouseId);
+        if (!validate) {
+            throw new ApiException("Not Found", "Armazém não cadastrado no sistema", 404);
+        }
+        return validate;
+    }
 
-        List<BatchStock> batchStocks = insertBatchInFufillment.getBatchStock();
-        for (BatchStock batchStock : batchStocks) {
-            Product product = this.productService.findById(batchStock.getProduct().getId());
+    public boolean validateSectionVolumeAvialiable (Double insertBatchInFufillmentVolumeAvaliable, Long sectionId)  {
+        double sectionVolumeAvaliable = this.sectionService.getSectionVolumeAvaliable(sectionId);
 
-            if (!product.getCategory().equals(section.getCategory())) throw new ApiException("Is Invalid", "A categoria do produto " + product.getName() + " esta invalido", 400);
+        boolean validate = sectionVolumeAvaliable > insertBatchInFufillmentVolumeAvaliable;
+        if (!validate) {
+            //adicionar erro adequado
+            throw new ApiException("Not Available", "Setor não tem capacidade de armazenamento", 400);
+        }
+        return validate;
+    }
+
+    public void validate(InsertBatchInFufillment insertBatchInFulfillmentData){
+        Long wareHouseId = insertBatchInFulfillmentData.getWarehouseId();
+        validateWareHouseExist(wareHouseId);
+
+        Long sectionId = insertBatchInFulfillmentData.getSectionId();
+        Optional<Section> optionSection = this.sectionService.findById(sectionId);
+        if (optionSection.isEmpty()) {
+            throw new ApiException("Not Found", "Setor não cadastrado no sistema", 404);
         }
 
+        List<BatchStock> batchsStock = insertBatchInFulfillmentData.getBatchStock();
+        for (BatchStock batch : batchsStock) {
+            Product product = this.productService.getById(batch.getProduct().getId());
+            if (!product.getCategory().equals(optionSection.get().getCategory())) throw new ApiException("Is Invalid", "A categoria do produto " + product.getName() + " esta invalido", 400);
+        }
+
+        double volumeTotalInbound = insertBatchInFulfillmentData
+                .getBatchStock()
+                .stream()
+                .mapToDouble(stock ->  {
+                    Long productId = stock.getProduct().getId();
+                    Product product = this.productService.getById(productId);
+                    return stock.getCurrentQuantity()*product.getVolume();
+                })
+                .sum()
+                ;
+        validateSectionVolumeAvialiable(volumeTotalInbound, sectionId);
+
+    }
+
+    public List<BatchStock> create(InsertBatchInFufillment insertBatchInFulfillmentData) {
+        this.validate(insertBatchInFulfillmentData);
+        Optional<Section> optionSection = this.sectionService.findById(insertBatchInFulfillmentData.getSectionId());
+
         InboundOrder inboundOrder = InboundOrder.builder()
-                .date(insertBatchInFufillment.getOrderDate())
-                .section(section)
+                .date(insertBatchInFulfillmentData.getOrderDate())
+                .section(optionSection.get())
                 .build();
 
         InboundOrder inboundOrderSave = this.inboundOrderService.save(inboundOrder);
+        List<BatchStock> batchsStock = insertBatchInFulfillmentData.getBatchStock();
+        batchsStock.forEach(batchStock -> batchStock.setInboundOrder(inboundOrderSave));
 
-        batchStocks.forEach(batchStock -> batchStock.setInboundOrder(inboundOrderSave));
-
-        return this.batchStockService.saveAll(batchStocks);
+        return this.batchStockService.saveAll(batchsStock);
     }
 
-    public List<BatchStock> update(Long id, InsertBatchInFufillment updateBatchInFulfillment) {
+    public InboundOrder update(Long id, InsertBatchInFufillment updateBatchInFulfillmentData) {
+        this.validate(updateBatchInFulfillmentData);
         InboundOrder inboundOrder = this.inboundOrderService.findById(id);
-        Section section = this.sectionService.findById(updateBatchInFulfillment.getSectionId());
+        Section section = this.sectionService.findById(updateBatchInFulfillmentData.getSectionId()).get();
 
-        inboundOrder.setDate(updateBatchInFulfillment.getOrderDate());
+        inboundOrder.setDate(updateBatchInFulfillmentData.getOrderDate());
         inboundOrder.setSection(section);
 
-        this.inboundOrderService.save(inboundOrder);
+        InboundOrder inboundOrderUpdated = this.inboundOrderService.save(inboundOrder);
 
-        List<BatchStock> batchStocks = updateBatchInFulfillment.getBatchStock();
-        for (BatchStock batchStock : batchStocks) {
-            this.batchStockService.findById(batchStock.getId());
+        List<BatchStock> batchsStock = updateBatchInFulfillmentData.getBatchStock();
 
-            this.batchStockService.save(batchStock);
-        }
+        batchsStock.forEach(batchStock -> batchStock.setInboundOrder(inboundOrder));
+        this.batchStockService.saveAll(batchsStock);
+        inboundOrderUpdated.setBatchStocks(batchsStock);
 
-       return batchStocks;
+        return inboundOrderUpdated;
+
     }
 
-    public BatchStock findOne(Long id) {
-        return this.batchStockService.findById(id);
-    }
 }

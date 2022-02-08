@@ -13,7 +13,7 @@ public class WarehouseService {
         this.warehouseRepository = warehouseRepository;
     }
 
-    public Warehouse findById(Long id) {
-        return this.warehouseRepository.findById(id).orElseThrow(()->new ApiException("Not Found", "Armazem não cadastrado no sistema", 404));
+    public Boolean existsByCode(Long warehouseId) {
+        return this.warehouseRepository.existsById(warehouseId);
     }
 }

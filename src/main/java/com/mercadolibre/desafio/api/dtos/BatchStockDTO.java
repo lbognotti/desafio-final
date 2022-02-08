@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+
+import java.time.LocalDateTime;
+
 import com.mercadolibre.desafio.api.entities.BatchStock;
 import com.mercadolibre.desafio.api.entities.Product;
 import lombok.AllArgsConstructor;
@@ -13,7 +16,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.*;
-import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -62,6 +64,11 @@ public class BatchStockDTO {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime manufacturingDate;
 
+    @JsonProperty("manufacturingTime")
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    private LocalDateTime manufacturingTime;
+
     @JsonProperty("dueDate")
     @NotNull
     @NotEmpty(message = "Data de validade não pode estar vazio")
@@ -72,6 +79,7 @@ public class BatchStockDTO {
 
     public static BatchStockDTO toBatchStockDTO(BatchStock batchStock) {
         return BatchStockDTO.builder()
+                .id(batchStock.getId())
                 .code(batchStock.getCode())
                 .productId(batchStock.getProduct().getId())
                 .maximumTemperature(batchStock.getMaximumTemperature())
@@ -86,8 +94,11 @@ public class BatchStockDTO {
 
     public static BatchStock toBatchStock(BatchStockDTO dto) {
         return BatchStock.builder()
-                .id(dto.id)
+                .id(dto.getId())
                 .code(dto.getCode())
+                .product(Product.builder()
+                        .id(dto.productId)
+                        .build())
                 .maximumTemperature(dto.getMaximumTemperature())
                 .currentTemperature(dto.getCurrentTemperature())
                 .minimumTemperature(dto.getMinimumTemperature())
@@ -95,7 +106,7 @@ public class BatchStockDTO {
                 .currentQuantity(dto.getCurrentQuantity())
                 .manufacturingDate(dto.getManufacturingDate())
                 .dueDate(dto.getDueDate())
-                .product(Product.builder().id(dto.productId).build())
                 .build();
     }
 }
+

@@ -5,17 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class InboundOrderRequestDTO {
+public class CartItemsResponseDTO {
+    @JsonProperty("purchaseOrderId")
+    private Long purchaseOrderId;
+
     @Valid
-    @NotNull(message = "Objeto inboundOrder não pode ser nulo")
-    @JsonProperty("inboundOrder")
-    private InboundOrderDTO inboundOrder;
+    @JsonProperty("items")
+    private List<ItemCartDTO> items;
 }

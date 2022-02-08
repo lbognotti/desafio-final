@@ -1,6 +1,5 @@
 package com.mercadolibre.desafio.api.entities;
 
-import com.mercadolibre.desafio.api.enums.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,15 +12,15 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
+public class Supervisor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
 
-    private Double volume;
+    private String lastname;
 
-    @Enumerated(value = EnumType.STRING)
-    private Category category;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Section section;
 }

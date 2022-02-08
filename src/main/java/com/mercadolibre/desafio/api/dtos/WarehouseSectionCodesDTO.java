@@ -6,17 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class WarehouseSectionCodesDTO {
-
     @JsonProperty("sectionId")
     @NotNull(message = "Código de setor não pode ser nulo")
     @NotEmpty(message = "Código de setor não pode ser vazio")

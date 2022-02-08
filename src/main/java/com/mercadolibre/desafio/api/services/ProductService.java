@@ -1,6 +1,7 @@
 package com.mercadolibre.desafio.api.services;
 
 import com.mercadolibre.desafio.api.entities.Product;
+import com.mercadolibre.desafio.api.enums.Category;
 import com.mercadolibre.desafio.api.exception.ApiException;
 import com.mercadolibre.desafio.api.repositories.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,11 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    public Product findById(Long id) {
-        return this.productRepository.findById(id).orElseThrow(()->new ApiException("Not Found", "Produto não cadastrado no sistema", 404));
+    public Product getById(Long productId) {
+        return this.productRepository.findById(productId).orElseThrow(() -> new ApiException("Not Found", "Produto não cadastrado no sistema", 404));
+    }
+
+    public Category productCategory (Long productId){
+        return this.productRepository.findById(productId).get().getCategory();
     }
 }

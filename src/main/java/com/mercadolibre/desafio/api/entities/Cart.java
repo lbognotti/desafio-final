@@ -1,6 +1,6 @@
 package com.mercadolibre.desafio.api.entities;
 
-import com.mercadolibre.desafio.api.enums.Category;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,15 +13,13 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
+public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
-    private Double volume;
-
-    @Enumerated(value = EnumType.STRING)
-    private Category category;
+    @OneToOne
+    @JoinColumn(name = "buyer_id")
+    @JsonManagedReference
+    private Buyer buyer;
 }

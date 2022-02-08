@@ -1,10 +1,8 @@
 package com.mercadolibre.desafio.api.dtos;
 
 import com.mercadolibre.desafio.api.entities.BatchStock;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,9 +10,9 @@ import java.util.stream.Collectors;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class InsertBatchInFufillment {
+    private Integer code;
+
     private LocalDateTime orderDate;
 
     private Long sectionId;

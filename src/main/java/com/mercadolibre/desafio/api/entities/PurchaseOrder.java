@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.mercadolibre.desafio.api.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,38 +18,19 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BatchStock {
+public class PurchaseOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String code;
-
-    private Double maximumTemperature;
-
-    private Double currentTemperature;
-
-    private Double minimumTemperature;
-
-    private Long initialQuantity;
-
-    private Long currentQuantity;
-
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    private LocalDateTime manufacturingDate;
+    private LocalDateTime date;
 
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    private LocalDateTime dueDate;
+    @Enumerated(value = EnumType.STRING)
+    private Status status;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    private InboundOrder inboundOrder;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    private Product product;
-
-    public Double getVolume() {
-        return this.currentQuantity * this.product.getVolume();
-    }
+    @OneToOne
+    @JoinColumn(name = "buyer_id")
+    private Buyer buyer;
 }

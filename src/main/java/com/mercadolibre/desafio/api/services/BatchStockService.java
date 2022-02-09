@@ -60,6 +60,28 @@ public class BatchStockService {
         return batchStocks.stream().filter(batchStock -> batchStock.getDueDate().isBefore(date)).collect(Collectors.toList());
     }
     /**
+     * Ordena uma lista de Lotes por data de nascimento, da mais próxima para a mais distante.
+     * @param batchStocks lista de lotes para ordenar.
+     */
+    private void sortBatchStocksByDueDateAsc(List<BatchStock> batchStocks) {
+        Comparator<BatchStock> comparator = Comparator
+                .comparing(BatchStock::getDueDate,
+                        (date1, date2) -> date1.isBefore(date2) ? -1 : date1.equals(date2) ? 0 : 1);
+        batchStocks.sort(comparator);
+    }
+
+    /**
+     * Ordena uma lista de Lotes por data de nascimento, da mais distante para a mais próxima.
+     * @param batchStocks lista de lotes para ordenar.
+     */
+    private void sortBatchStocksByDueDateDesc(List<BatchStock> batchStocks) {
+        Comparator<BatchStock> comparator = Comparator
+                .comparing(BatchStock::getDueDate,
+                        (date1, date2) -> date1.isAfter(date2) ? -1 : date1.equals(date2) ? 0 : 1);
+        batchStocks.sort(comparator);
+    }
+
+    /**
      * Retorna uma lista de Lotes que vencem em um determinado número de dias.
      *
      * @param numberOfDays números de dias para o vencimento
@@ -83,23 +105,17 @@ public class BatchStockService {
      * @return lista de lotes categorizada e ordenada por vencimento
      */
     public List<BatchStock> listByCategoryExpiringIn(Category category, Integer days, boolean ascendent) {
-        List<BatchStock> batchStocks = this.listExpiringIn(days);
-        Comparator<BatchStock> comparator;
-
-        if (ascendent) {
-            comparator = Comparator
-                    .comparing(BatchStock::getDueDate,
-                            (date1, date2) -> date1.isBefore(date2) ? -1 : date1.equals(date2) ? 0 : 1);
-        } else {
-            comparator = Comparator
-                    .comparing(BatchStock::getDueDate,
-                            (date1, date2) -> date1.isAfter(date2) ? -1 : date1.equals(date2) ? 0 : 1);
-        }
-
-        batchStocks.sort(comparator);
-
-        return batchStocks.stream()
+        List<BatchStock> batchStocks = this.listExpiringIn(days)
+                .stream()
                 .filter(b -> b.getProduct().getCategory().equals(category))
                 .collect(Collectors.toList());
+
+        if (ascendent) {
+            this.sortBatchStocksByDueDateAsc(batchStocks);
+        } else {
+            this.sortBatchStocksByDueDateDesc(batchStocks);
+        }
+
+        return batchStocks;
     }
 }

@@ -1,7 +1,7 @@
 package com.mercadolibre.desafio.api.services;
 
 import com.mercadolibre.desafio.api.entities.BatchStock;
-import com.mercadolibre.desafio.api.entities.InboundOrder;
+import com.mercadolibre.desafio.api.enums.Category;
 import com.mercadolibre.desafio.api.exception.ApiException;
 import com.mercadolibre.desafio.api.repositories.BatchStockRepisitory;
 import com.mercadolibre.desafio.api.repositories.SectionRepository;
@@ -53,10 +53,32 @@ public class BatchStockService {
     }
 
     public List<BatchStock> findOneLoteDuedateBatchStock(Long sectionId, Long dueDate) {
-        // 1 SETOR -> N InobunderOrder -> N BatchStock
         LocalDateTime date = LocalDateTime.now().plusDays(dueDate);
         List<BatchStock> batchStocks = this.sectionRepository.findBatchStock(sectionId);
         if (batchStocks.size() == 0) throw new ApiException("Not Null", "Setor nao cadastrado no sistema", 404);
         return batchStocks.stream().filter(batchStock -> batchStock.getDueDate().isBefore(date)).collect(Collectors.toList());
+    }
+    /**
+     * Retorna uma lista de Lotes que vencem em um determinado número de dias.
+     * @param numberOfDays números de dias para o vencimento
+     * @return lista de lotes
+     * @author Ronaldd Pinho
+     */
+    public List<BatchStock> listExpiringIn(Integer numberOfDays) {
+        List<BatchStock> batchStocks = this.batchStockRepository.findAll();
+        LocalDateTime until = LocalDateTime.now().plusDays(numberOfDays);
+
+        List<BatchStock> batchStocksToExpires = batchStocks.stream()
+                .filter(b -> b.getDueDate().isBefore(until))
+                .collect(Collectors.toList());
+
+        return batchStocksToExpires;
+    }
+
+    public List<BatchStock> listByCategoryExpiringIn(Category category, Integer days) {
+        List<BatchStock> batchStocks = this.listExpiringIn(days);
+        return batchStocks.stream()
+                .filter(b -> b.getProduct().getCategory().equals(category))
+                .collect(Collectors.toList());
     }
 }

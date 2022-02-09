@@ -51,4 +51,8 @@ public class BatchStock {
     public Double getVolume() {
         return this.currentQuantity * this.product.getVolume();
     }
+
+    public Warehouse getWarehouse() {
+        return this.getInboundOrder().getSection().getWarehouse();
+    }
 }

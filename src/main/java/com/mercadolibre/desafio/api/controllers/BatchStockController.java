@@ -32,9 +32,11 @@ public class BatchStockController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<BatchStockMinDTO>>
-    listByDueDateAndCategory(@RequestParam("days") Integer numberOfDays, @RequestParam("category") Category category) {
-        List<BatchStock> batchStocks = this.batchStockService.listByCategoryExpiringIn(category, numberOfDays);
+    public ResponseEntity<List<BatchStockMinDTO>> listByDueDateAndCategory(
+            @RequestParam("days") Integer numberOfDays,
+            @RequestParam("category") Category category,
+            @RequestParam(value = "asc", defaultValue = "true") boolean asc) {
+        List<BatchStock> batchStocks = this.batchStockService.listByCategoryExpiringIn(category, numberOfDays, asc);
         List<BatchStockMinDTO> responseBody = batchStocks.stream()
                 .map(BatchStockMinDTO::toBatchStockMinDTO)
                 .collect(Collectors.toList());

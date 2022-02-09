@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,6 +61,7 @@ public class BatchStockService {
     }
     /**
      * Retorna uma lista de Lotes que vencem em um determinado número de dias.
+     *
      * @param numberOfDays números de dias para o vencimento
      * @return lista de lotes
      * @author Ronaldd Pinho
@@ -68,15 +70,34 @@ public class BatchStockService {
         List<BatchStock> batchStocks = this.batchStockRepository.findAll();
         LocalDateTime until = LocalDateTime.now().plusDays(numberOfDays);
 
-        List<BatchStock> batchStocksToExpires = batchStocks.stream()
+        return batchStocks.stream()
                 .filter(b -> b.getDueDate().isBefore(until))
                 .collect(Collectors.toList());
-
-        return batchStocksToExpires;
     }
 
-    public List<BatchStock> listByCategoryExpiringIn(Category category, Integer days) {
+    /**
+     * Retorna uma lista de Lotes que vencem em um determinado número de dias filtrando por uma categoria de produto
+     *
+     * @param category categoria de produto
+     * @param days número de dias até o vencimento
+     * @return lista de lotes categorizada e ordenada por vencimento
+     */
+    public List<BatchStock> listByCategoryExpiringIn(Category category, Integer days, boolean ascendent) {
         List<BatchStock> batchStocks = this.listExpiringIn(days);
+        Comparator<BatchStock> comparator;
+
+        if (ascendent) {
+            comparator = Comparator
+                    .comparing(BatchStock::getDueDate,
+                            (date1, date2) -> date1.isBefore(date2) ? -1 : date1.equals(date2) ? 0 : 1);
+        } else {
+            comparator = Comparator
+                    .comparing(BatchStock::getDueDate,
+                            (date1, date2) -> date1.isAfter(date2) ? -1 : date1.equals(date2) ? 0 : 1);
+        }
+
+        batchStocks.sort(comparator);
+
         return batchStocks.stream()
                 .filter(b -> b.getProduct().getCategory().equals(category))
                 .collect(Collectors.toList());

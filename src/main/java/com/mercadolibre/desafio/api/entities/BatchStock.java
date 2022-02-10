@@ -10,6 +10,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -52,7 +54,12 @@ public class BatchStock {
         return this.currentQuantity * this.product.getVolume();
     }
 
+
+    public long daysUntilDueDate() {
+        return Duration.between(LocalDateTime.now(), this.dueDate).toDays();
+
     public Warehouse getWarehouse() {
         return this.getInboundOrder().getSection().getWarehouse();
+
     }
 }

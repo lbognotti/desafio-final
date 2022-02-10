@@ -1,11 +1,13 @@
 package com.mercadolibre.desafio.api.controllers;
 
+import com.mercadolibre.desafio.api.dtos.BatchStockRequisito3DTO;
 import com.mercadolibre.desafio.api.entities.BatchStock;
 import com.mercadolibre.desafio.api.services.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/fresh-products/list")
@@ -16,11 +18,21 @@ public class ProductController {
         this.productService = productService;
     }
 
+//    @GetMapping
+//    public ResponseEntity<List<BatchStockRequisito3DTO>> getProducts(@RequestParam String productId) {
+//        List<BatchStock> batchStocks = this.productService.findOneProduct(Long.parseLong(productId));
+//        List<BatchStockRequisito3DTO> batchStockRequisito3DTOList = BatchStockRequisito3DTO.toList(batchStocks);
+//        BatchStock batchStock = batchStocks.get(0);
+//        return ResponseEntity.ok(batchStockRequisito3DTOList);
+//    }
+
     @GetMapping
-    public ResponseEntity<List<BatchStock>> getProducts(@RequestParam String productId) {
+    public ResponseEntity<List<BatchStockRequisito3DTO>> getProducts(@RequestParam String productId) {
         List<BatchStock> batchStocks = this.productService.findOneProduct(Long.parseLong(productId));
+        List<BatchStockRequisito3DTO> batchStockRequisito3DTOList = BatchStockRequisito3DTO.toList(batchStocks);
+        batchStockRequisito3DTOList = batchStockRequisito3DTOList.stream().filter(batchStockRequisito3DTO -> batchStockRequisito3DTO.getCurrentQuantity()>3 && ).collect(Collectors.toList());
         BatchStock batchStock = batchStocks.get(0);
-        return ResponseEntity.ok(batchStocks);
+        return ResponseEntity.ok(batchStockRequisito3DTOList);
     }
 // , batchStock.getInboundOrder().getSection().getWarehouse().getId()
 //    @GetMapping("/{category}")

@@ -33,4 +33,8 @@ public class ProductService {
          if (batchStock.size() == 0) throw new ApiException("Not Found", "Produto não cadastrado no sistema", 404);
          return batchStock;
     }
+
+    public Boolean existsByCode(Long productId) {
+        return this.productRepository.existsById(productId);
+    }
 }

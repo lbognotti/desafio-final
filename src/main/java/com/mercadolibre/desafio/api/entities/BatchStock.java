@@ -54,8 +54,12 @@ public class BatchStock {
         return this.currentQuantity * this.product.getVolume();
     }
 
-    //Esse metodo seria usado varias vezes
+
     public long daysUntilDueDate() {
         return Duration.between(LocalDateTime.now(), this.dueDate).toDays();
+
+    public Warehouse getWarehouse() {
+        return this.getInboundOrder().getSection().getWarehouse();
+
     }
 }

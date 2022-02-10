@@ -1,26 +1,34 @@
 package com.mercadolibre.desafio.api.services;
 
+
+import com.mercadolibre.desafio.api.dtos.WarehouseQtyDTO;
 import com.mercadolibre.desafio.api.entities.BatchStock;
 import com.mercadolibre.desafio.api.entities.Product;
 import com.mercadolibre.desafio.api.enums.Category;
 import com.mercadolibre.desafio.api.exception.ApiException;
 import com.mercadolibre.desafio.api.repositories.BatchStockRepisitory;
 import com.mercadolibre.desafio.api.repositories.ProductRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+
 @Service
+@AllArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
     private final BatchStockRepisitory batchStockRepisitory;
+    private WarehouseService warehouseService;
 
-    public ProductService(ProductRepository productRepository, BatchStockRepisitory batchStockRepisitory) {
+    public ProductService(ProductRepository productRepository, BatchStockRepisitory batchStockRepisitory, WarehouseService warehouseService;) {
         this.productRepository = productRepository;
         this.batchStockRepisitory = batchStockRepisitory;
+        this.warehouseService = warehouseService;
     }
 
     public Product getById(Long productId) {
@@ -84,5 +92,41 @@ public class ProductService {
 
     public Boolean existsByCode(Long productId) {
         return this.productRepository.existsById(productId);
+    }
+
+    /**
+     * Busca um produto pelo seu ID e então conta a quantidade existente em estoque desse produto em cada armazém
+     * existente.
+     * @param productId ID do produto.
+     * @return Lista de objetos com o ID do armazém e a quantidade.
+     * @author Ronaldd Pinho.
+     */
+    public List<WarehouseQtyDTO> getQuantityByWarehouse(Long productId) {
+        if (!this.productRepository.existsById(productId)) {
+            throw  new ApiException("Not Found", "Produto não encontrado", 404);
+        }
+        List<BatchStock> batchStocks = this.productRepository.findAllBatchStocks(productId);
+        List<Long> warehouseIds = this.warehouseService.getIds();
+
+        List<WarehouseQtyDTO> quantities = new ArrayList<>();
+
+        for (Long warehouseId : warehouseIds) {
+            long quantity = batchStocks.stream()
+                    .filter(batchStock -> batchStock.getWarehouse().getId().equals(warehouseId))
+                    .mapToLong(BatchStock::getCurrentQuantity)
+                    .reduce(Long::sum)
+                    .orElse(0L);
+
+            if (quantity == 0L) continue;
+
+            WarehouseQtyDTO quantityDto = WarehouseQtyDTO.builder()
+                    .warehouseId(warehouseId)
+                    .totalQuantity(quantity)
+                    .build();
+
+            quantities.add(quantityDto);
+        }
+
+        return quantities;
     }
 }

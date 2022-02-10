@@ -56,6 +56,6 @@ public class BatchStock {
 
     //Esse metodo seria usado varias vezes
     public long daysUntilDueDate() {
-        return Duration.between(LocalDate.now(), this.dueDate).toDays();
+        return Duration.between(LocalDateTime.now(), this.dueDate).toDays();
     }
 }

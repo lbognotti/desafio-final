@@ -23,8 +23,7 @@ public class BatchStockRequisito3DTO {
     private Long sectionId;
     private Long wareHouseId;
 
-    public static BatchStockRequisito3DTO toBatchStockDTO (BatchStock batchStock1)
-    {
+    public static BatchStockRequisito3DTO toBatchStockDTO (BatchStock batchStock1) {
         return BatchStockRequisito3DTO.builder()
                 .batchNumber(batchStock1.getCode())
                 .currentQuantity(batchStock1.getCurrentQuantity())
@@ -35,11 +34,10 @@ public class BatchStockRequisito3DTO {
                 .build();
     }
 
-    public static List<BatchStockRequisito3DTO> toList (List<BatchStock> batchStocks1)
-    {
+    public static List<BatchStockRequisito3DTO> toList (List<BatchStock> batchStocks1) {
         return batchStocks1
                 .stream().
-                        map(BatchStockToDTO -> toBatchStockDTO(BatchStockToDTO))
+                        map(BatchStockRequisito3DTO::toBatchStockDTO)
                 .collect(Collectors.toList());
     }
 }

@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/fresh-products/orders")
+@RequestMapping("/fresh-products/orders")
 public class OrderController {
     private final OrderService orderService;
 

@@ -11,12 +11,9 @@ import java.util.List;
 import com.mercadolibre.desafio.api.dtos.ProductWarehousesDTO;
 
 @RestController
-@RequestMapping("/api/v1/fresh-products/list")
+@RequestMapping("/fresh-products/list")
 public class ProductController {
     private final ProductService productService;
-  
-  
-    @Autowired
 
     public ProductController(ProductService productService) {
         this.productService = productService;

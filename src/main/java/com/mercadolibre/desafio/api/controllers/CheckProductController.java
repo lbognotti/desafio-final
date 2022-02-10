@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/fresh-products/list1")
+@RequestMapping("/fresh-products/list1")
 public class CheckProductController {
 
     private final CheckProductService checkProductService;

@@ -27,8 +27,12 @@ public class SalesAdService {
     }
 
     public Double getTotalPriceByIds(List<PurchaseOrderItemDTO> items) {
-        return items.stream().map(item -> { SalesAd ad = this.findOne(item.getSalesAdId());
-            return ad.getPrice().doubleValue() * item.getQuantity(); }).reduce(Double::sum).get();
+        return items.stream()
+                .map(item -> {
+                    SalesAd ad = this.findOne(item.getSalesAdId());
+                    return ad.getPrice().doubleValue() * item.getQuantity();
+                })
+                .reduce(Double::sum).get();
     }
 
     public boolean allExists(List<Long> ids) {
@@ -60,19 +64,19 @@ public class SalesAdService {
 
     public List<SalesAd> findAllSalesAd() {
         List<SalesAd> salesAdList = this.salesAdRepository.findAll();
-        if (salesAdList.isEmpty()){
+        if (salesAdList.isEmpty()) {
             throw new ApiException("Not found", "Lista de produtos não encontrada", 404);
         }
         return salesAdList;
     }
 
-    public List<SalesAd> findAllSalesAdByCategory(Category category){
+    public List<SalesAd> findAllSalesAdByCategory(Category category) {
         List<SalesAd> salesAdList = findAllSalesAd();
         salesAdList = salesAdList
                 .stream()
                 .filter(a -> a.getBatchStock().getProduct().getCategory() == category)
                 .collect(Collectors.toList());
-        if (salesAdList.isEmpty()){
+        if (salesAdList.isEmpty()) {
             throw new ApiException("Not found", "Lista de produtos não encontrada", 404);
         }
         return salesAdList;

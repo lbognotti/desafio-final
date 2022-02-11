@@ -229,11 +229,11 @@ class ProductServiceTest
    
 # Autores
 
-- <strong>Everson Okuhara</strong> - Desenvolvedor e Documentação
+- <strong>Everson Okuhara</strong> - Desenvolvedor
 - <strong>Lucas Matos</strong> - Desenvolvedor
 - <strong>Ronaldd Pinho</strong> - Desenvolvedor
 - <strong>Tiago Wolsen</strong> - Desenvolvedor
-- <strong>Vinicius Feitoza</strong> - Desenvolvedor e Documentação
+- <strong>Vinicius Feitoza</strong> - Desenvolvedor
 
 # Expressões de Gratidão
 

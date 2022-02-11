@@ -47,7 +47,7 @@ public class BatchStockService {
 
     public long daysUntilDueDate(Long batchId) {
         Optional<BatchStock> batchStock = this.batchStockRepository.findById(batchId);
-        if (!batchStock.isPresent()) {
+        if (batchStock.isEmpty()) {
             throw new ApiException("Not Found", "BatchStock não cadastrado no sistema", 404);
         }
         return Duration.between(LocalDate.now(), batchStock.get().getDueDate()).toDays();

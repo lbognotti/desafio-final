@@ -1,22 +1,30 @@
 package com.mercadolibre.desafio.api.controllers;
 
 import com.mercadolibre.desafio.api.dtos.BatchStockRequisito3DTO;
+import com.mercadolibre.desafio.api.dtos.SalesAdDTO;
 import com.mercadolibre.desafio.api.entities.BatchStock;
+import com.mercadolibre.desafio.api.enums.Category;
 import com.mercadolibre.desafio.api.services.ProductService;
+import com.mercadolibre.desafio.api.services.SalesAdService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.mercadolibre.desafio.api.dtos.WarehouseQtyDTO;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import com.mercadolibre.desafio.api.dtos.ProductWarehousesDTO;
 
 @RestController
-@RequestMapping("/fresh-products/list")
+@RequestMapping("/fresh-products")
 public class ProductController {
     private final ProductService productService;
 
-    public ProductController(ProductService productService) {
+    private final SalesAdService salesAdService;
+
+    public ProductController(ProductService productService,  SalesAdService salesAdService) {
         this.productService = productService;
+        this.salesAdService = salesAdService;
     }
 
     @GetMapping
@@ -24,6 +32,14 @@ public class ProductController {
         List<BatchStock> batchStocks = this.productService.findOneProduct(Long.parseLong(productId));
         List<BatchStockRequisito3DTO> batchStockRequisito3DTOList = BatchStockRequisito3DTO.toList(batchStocks);
         return ResponseEntity.ok(batchStockRequisito3DTOList);
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<SalesAdDTO>> getProducts (@RequestParam Category category) {
+        List<SalesAdDTO> filteredList = this.salesAdService.findAllSalesAdByCategory(category)
+                .stream().map(SalesAdDTO::toSalesAdDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(filteredList);
     }
 
     @GetMapping("/order")
